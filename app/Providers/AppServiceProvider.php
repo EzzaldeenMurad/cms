@@ -6,6 +6,8 @@ use App\Http\Composers\CategoryComposer;
 use App\Http\Composers\CommentComposer;
 use App\Http\Composers\PageComposer;
 use App\Http\Composers\RoleComposer;
+use App\Repositories\PostRepository;
+use App\Repositories\PostRepositoryInterface;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -17,6 +19,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->bind(PostRepositoryInterface::class, PostRepository::class);
     }
 
     /**

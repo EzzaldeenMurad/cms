@@ -3,16 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Slug;
+use App\Http\Requests\PostRequest;
 use App\Models\Category;
 use App\Models\Post;
+use App\Services\PostService;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
-    public $post;
-    function __construct(Post $post)
+    protected $postService;
+    function __construct(PostService $postService)
     {
-        $this->post =  $post;
+        $this->postService =  $postService;
         $this->middleware('verified')->only('create');
     }
     /**
@@ -20,7 +22,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = $this->post::with('user:id,name,profile_photo_path')->approved()->paginate(2);
+        $posts =  $this->postService->getAllPosts();
         $title = 'جميع المنشورات';
         return view('index', compact('posts', 'title'));
     }
@@ -36,20 +38,11 @@ class PostController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(PostRequest $postRequest)
     {
-        $request->validate([
-            'title' => 'required',
-            'body' => 'required',
 
-        ]);
-
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $fileName = time() . $file->getClientOriginalName();
-            $file->storeAs('public/images/', $fileName);
-        }
-        $request->user()->posts()->create($request->all() + ['image_path' => $fileName ?? 'default.jpg'] + ['slug' => $request->title]);
+        $data = $postRequest->all();
+        $this->postService->createPost($data);
         return back()->with('success', 'تم إضافة المنشور بنجاح، سيظهر بعد أن يوافق عليه المسؤول');
     }
 
@@ -58,7 +51,7 @@ class PostController extends Controller
      */
     public function show($slug)
     {
-        $post = $this->post::where('slug', $slug)->first();
+        $post = $this->postService->getPost($slug);
         // $comments = $post->comments->sortByDesc('created_at');
         return view('posts.show', compact('post'));
     }
@@ -68,7 +61,7 @@ class PostController extends Controller
      */
     public function edit($id)
     {
-        $post = $this->post::find($id);
+        $post = $this->postService->findPost($id);
 
         abort_unless(auth()->user()->can('edit-post', $post), 403);
 
@@ -78,23 +71,11 @@ class PostController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $slug)
+    public function update(PostRequest $postRequest, $slug)
     {
-        $data = $this->validate($request, [
-            'title' => 'required',
-            'body' => 'required',
-        ]);
 
-        $data['slug'] = Slug::uniqueSlug($request->title, 'posts');
-        $data['category_id'] = $request->category_id;
-
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $filename = time() . $file->getClientOriginalName();
-            $file->storeAs('public/images/', $filename);
-        }
-
-        $request->user()->posts()->where('slug', $slug)->update($data + ['image_path' => $filename ?? 'default.jpg']);
+        $data = $postRequest->validated();
+        $this->postService->updatePost($data, $slug);
 
         return redirect(route('post.show', $data['slug']))->with('success', 'تم تعديل المنشور بنجاح');
     }
@@ -104,22 +85,20 @@ class PostController extends Controller
      */
     public function destroy($id)
     {
-        $post = $this->post::find($id);
-
-        $post->delete();
+        $this->postService->deletePost($id);
 
         return back()->with('success', 'تم حذف المنشور بنجاح');
     }
 
     public function search(Request $request)
     {
-        $posts = $this->post::where('body', 'like', '%' . $request->keyword . '%')->with('user')->approved()->paginate(2);
+        $posts =  $this->postService->search($request->keyword);
         $title = "نتائج البحث عن: " . $request->keyword;
         return view('index', compact('posts', 'title'));
     }
     public function getByCategory($id)
     {
-        $posts = $this->post::with('user')->whereCategory_id($id)->approved()->paginate(10);
+        $posts =  $this->postService->getByCategory($id);
         $title = "المنشورات العائدة لتصنيف: " . Category::find($id)->title;
         return view('index', compact('posts', 'title'));
     }

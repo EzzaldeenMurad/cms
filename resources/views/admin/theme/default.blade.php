@@ -16,7 +16,7 @@
   <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-  
+
   <!-- Custom styles for this template-->
   <link href="{!! asset('theme/css/sb-admin-2.min.css') !!}" rel="stylesheet">
 
@@ -64,7 +64,7 @@
           @if(Session::has('success'))
               <div class="p-3 mb-2 bg-success text-white rounded text-center">
                   {{ session('success') }}
-              </div>  
+              </div>
           @endif
           <!-- Page Heading -->
           <div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -104,7 +104,7 @@
         <div class="modal-body">إذا كنت متأكد أنك تريد إنهاء الجلسة اضغط على زر خروج</div>
         <div class="modal-footer">
           <button class="btn btn-secondary" type="button" data-dismiss="modal">إلغاء</button>
-          <a class="btn btn-primary" 
+          <a class="btn btn-primary"
              href="{{ route('logout') }}"
              onclick="event.preventDefault();
              document.getElementById('logout-form').submit();"

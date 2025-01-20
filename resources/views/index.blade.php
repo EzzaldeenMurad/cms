@@ -32,7 +32,7 @@
                                 </div>
                             </div>
                             <h4 class="my-2 h4"><a href="{{ route('post.show', $post->slug) }}">{{ $post->title }}</a></h4>
-                            <p class="card-text mb-2">{!! Str::limit($post->body, 200) !!}</p>
+                            <p class="card-text mb-2">{!! Str::limit($post->body, 200) !!}  </p>
                         </div>
                     </div>
                 </div>
