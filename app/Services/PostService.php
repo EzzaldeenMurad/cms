@@ -3,12 +3,14 @@
 namespace App\Services;
 
 use App\Helpers\Slug;
-use App\Repositories\PostRepositoryInterface;
-use App\Repositories\RepositoryInterface;
+use App\Repositories\Contracts\PostRepositoryInterface;
+use App\Repositories\PostRepository;
+
+;
 
 class PostService
 {
-    protected $postRepository;
+    protected  $postRepository;
     public function __construct(PostRepositoryInterface $postRepository)
     {
         $this->postRepository = $postRepository;
@@ -30,11 +32,11 @@ class PostService
         return $this->postRepository->create($data + ['image_path' => $fileName ?? 'default.jpg']);
     }
 
-    public function getPost($slug)
+    public function getPostBySlug($slug)
     {
-        return $this->postRepository->show($slug);
+        return $this->postRepository->findBySlug($slug);
     }
-    public function findPost($id)
+    public function getPost($id)
     {
         return $this->postRepository->find($id);
     }
@@ -48,12 +50,12 @@ class PostService
             $filename = time() . $file->getClientOriginalName();
             $file->storeAs('public/images/', $filename);
         }
-        $data['user_id'] = auth()->id();
+        $this->postRepository->update($data + ['image_path' => $filename ?? 'default.jpg'], $slug);
     }
 
     public function deletePost($id)
     {
-        return $this->postRepository->delete($id);
+        return $this->postRepository->destroy($id);
     }
     public function getByCategory($categoryId)
     {

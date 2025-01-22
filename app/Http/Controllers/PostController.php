@@ -51,7 +51,7 @@ class PostController extends Controller
      */
     public function show($slug)
     {
-        $post = $this->postService->getPost($slug);
+        $post = $this->postService->getPostBySlug($slug);
         // $comments = $post->comments->sortByDesc('created_at');
         return view('posts.show', compact('post'));
     }
@@ -61,7 +61,7 @@ class PostController extends Controller
      */
     public function edit($id)
     {
-        $post = $this->postService->findPost($id);
+        $post = $this->postService->getPost($id);
 
         abort_unless(auth()->user()->can('edit-post', $post), 403);
 

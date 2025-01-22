@@ -3,16 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Services\CategoryService;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
 
-    public $category;
+    public $categoryService;
 
-    public function __construct(Category $category)
+    public function __construct(CategoryService $categoryService)
     {
-        $this->category = $category;
+        $this->categoryService = $categoryService;
     }
 
     /**
@@ -20,7 +21,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        return view('admin.category', ['categories' => $this->category->all()]);
+        return view('admin.category', ['categories' => $this->categoryService->getAllCategories()]);
     }
 
     /**
@@ -39,7 +40,8 @@ class CategoryController extends Controller
         $this->validate($request, [
             'title' => 'required'
         ]);
-        $this->category->create($request->all() + ['slug' => $request->title]);
+
+        $this->categoryService->createCategory($request->all());
         return back()->with('success', "تم إضافة التصنيف بنجاح");
     }
 
@@ -72,7 +74,7 @@ class CategoryController extends Controller
      */
     public function destroy($id)
     {
-        $this->category->find($id)->delete();
+        $this->categoryService->deleteCategory($id);
         return back()->with('success', "تم حذف التصنيف بنجاح");
     }
 }

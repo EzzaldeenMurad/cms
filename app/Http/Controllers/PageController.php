@@ -4,15 +4,16 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Page;
+use App\Services\PageService;
 
 class PageController extends Controller
 {
-    public $page;
+    public $pageService;
 
-    public function __construct(Page $page)
+    public function __construct(PageService $pageService)
     {
         $this->middleware('Admin')->except('show');
-        $this->page = $page;
+        $this->pageService = $pageService;
     }
 
     /**
@@ -22,7 +23,7 @@ class PageController extends Controller
      */
     public function index()
     {
-        $pages=$this->page->all();
+        $pages = $this->pageService->getAllPages();
 
         return view('admin.pages.index', compact('pages'));
     }
@@ -45,7 +46,7 @@ class PageController extends Controller
      */
     public function store(Request $request)
     {
-        $pages = $this->page->create($request->all());
+        $this->pageService->createPage($request->all());
 
         return redirect(route('page.index'))->with('success', 'تم إضافة الصفحة بنجاح');
     }
@@ -58,7 +59,7 @@ class PageController extends Controller
      */
     public function show($slug)
     {
-        $page = $this->page->whereSlug($slug)->first();
+        $page = $this->pageService->getPageBySlug($slug);
 
         return view('admin.pages.show', compact('page'));
     }
@@ -71,9 +72,9 @@ class PageController extends Controller
      */
     public function edit($id)
     {
-        $page = $this->page->find($id);
+        $page = $this->pageService->getPage($id);
 
-        return view('admin.pages.edit' ,compact('page'));
+        return view('admin.pages.edit', compact('page'));
     }
 
     /**
@@ -85,8 +86,7 @@ class PageController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $this->page->find($id)->update($request->all());
-
+        $this->pageService->updatePage($request->all(), $id);
         return redirect(route('page.index'))->with('success', 'تم تعديل الصفحة بنجاح');
     }
 
@@ -98,7 +98,7 @@ class PageController extends Controller
      */
     public function destroy($id)
     {
-        $this->page->find($id)->delete();
+        $this->pageService->deletePage($id);
 
         return back()->with('success', 'تم حذف الصفحة بنجاح');
     }

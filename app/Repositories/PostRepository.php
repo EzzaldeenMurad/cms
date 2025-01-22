@@ -3,9 +3,12 @@
 namespace App\Repositories;
 
 use App\Models\Post;
+
+use App\Repositories\Contracts\PostRepositoryInterface;
+use App\Repositories\Contracts\SluggableRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
 
-class PostRepository  implements PostRepositoryInterface
+class PostRepository  implements PostRepositoryInterface, SluggableRepositoryInterface
 {
     private $post;
 
@@ -22,20 +25,18 @@ class PostRepository  implements PostRepositoryInterface
     {
         return $this->post->create($data);
     }
-
     public function update(array $data, $slug)
     {
         return Auth::user()->posts()->whereSlug($slug)->update($data);
     }
-
-    public function delete($id)
+    public function destroy($id)
     {
         return $this->post->destroy($id);
     }
 
-    public function show($slug)
+    public function findBySlug($slug)
     {
-        return $this->post->whereSlug($slug)->first();
+        return $this->post->whereSlug($slug)->firstOrFail();
     }
     public function find($id)
     {
